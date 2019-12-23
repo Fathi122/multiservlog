@@ -41,8 +41,15 @@ var (
 
 // selectService switch to proper log file
 func selectService(selectedService service) *log.Entry {
-	serv := srvFd[int(selectedService)-1]
-	serviceName := "service" + strconv.Itoa(int(selectedService))
+	// test service index
+	index := int(selectedService)
+	if index > len(srvFd) || index <= 0 {
+		errorMsg := strconv.Itoa(index) + " is an invalid Service Index"
+		panic(errorMsg)
+	}
+
+	serv := srvFd[index-1]
+	serviceName := "service" + strconv.Itoa(index)
 
 	log.SetOutput(serv)
 	return log.WithFields(log.Fields{"service": serviceName})
@@ -77,7 +84,7 @@ func main() {
 	for i := 0; i < len(srvFd); i++ {
 		srvFd[i], err = os.OpenFile("service"+strconv.Itoa(i+1)+".log", os.O_CREATE|os.O_APPEND, 0644)
 		if err != nil {
-			log.Fatal(err)
+			panic(err.Error())
 		}
 	}
 	// close fds
